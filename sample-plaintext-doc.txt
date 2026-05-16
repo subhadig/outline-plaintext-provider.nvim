@@ -1,0 +1,61 @@
+TITLE:   Encrypted Gateway Initialization Protocol
+AUTHOR:  Subhadip Ghosh
+DATE:    2026-03-21
+STATUS:  Draft / Technical Review
+--------------------------------------------------------------------------------
+
+
+1.  SYSTEM OVERVIEW
+===================
+
+This document outlines the logical sequence required to establish a secure 
+handshake between the local client and the primary gateway server. 
+It assumes that the hardware environment meets all minimum specifications 
+defined in the global infrastructure manual.
+
+Each step in this protocol must be executed in the exact order presented to 
+prevent a state-mismatch error during the cryptographic exchange. 
+Failure to follow the timing constraints may result in a temporary IP lockout.
+
+
+1.1  PRE-FLIGHT CHECKLIST
+-------------------------
+
+Before initiating the handshake, verify the following local conditions:
+    * Active Ethernet connection on eth0 or eth1.
+    * System clock synchronized via NTP to within 500ms of UTC.
+    * Availability of at least 128MB of unallocated RAM for the buffer.
+
+
+2.  INITIALIZATION SEQUENCE
+===========================
+
+The process begins by broadcasting a 'SYN-INIT' packet to the gateway.
+The gateway will respond with a challenge string encrypted using the 
+public key found in the local /etc/ssl/certs/ directory.
+
+If the challenge is not received within 5000ms, the client must 
+back off for a randomized interval between 1 and 10 seconds.
+This prevents a "thundering herd" problem if the gateway has just rebooted.
+
+Once the challenge is decrypted, the client generates a session-specific 
+token and returns it via a POST request to the /api/v1/auth endpoint.
+The following headers are mandatory for this request:
+    * AUTH-TOKEN: [Decrypted-Challenge-String]
+    * CLIENT-ID:  [Unique-Hardware-UUID]
+    * TIMESTAMP:  [Current-Unix-Epoch]
+
+
+2.1  ERROR HANDLING
+-------------------
+
+In the event of a 403 Forbidden response, check the local logs located 
+at /var/log/gateway/auth.log for a specific error code.
+Common codes include:
+    1. ERR-01: Invalid public key.
+    2. ERR-02: Clock skew exceeds maximum threshold.
+    3. ERR-03: Client UUID is blacklisted.
+
+
+--------------------------------------------------------------------------------
+[END OF DOCUMENT]
