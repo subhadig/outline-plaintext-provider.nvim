@@ -26,11 +26,21 @@ repository.
 2.1  INSTALL THE PLAINTEXT PROVIDER PLUGIN
 ------------------------------------------
 
-Using nvim native packages:
+USING NVIM NATIVE PACKAGES:
 
     % mkdir -p ~/.local/share/nvim/site/pack/plugins/start/
     % cd ~/.local/share/nvim/site/pack/plugins/start/
     % git clone https://github.com/subhadig/outline-plaintext-provider.nvim.git
+
+USING NVIM PACKAGE MANAGER:
+
+    a) Add to "init.lua":
+            vim.pack.add({
+                'https://github.com/subhadig/outline-plaintext-provider.nvim'
+            })
+    b) Restart neovim:
+            :restart
+
 
 
 2.2  CONFIGURE OUTLINE.NVIM
